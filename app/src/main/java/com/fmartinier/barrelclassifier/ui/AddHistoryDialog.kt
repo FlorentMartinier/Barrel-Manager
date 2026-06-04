@@ -140,7 +140,7 @@ class AddHistoryDialog : DialogFragment() {
             .setView(view)
             .setPositiveButton(getString(positiveButtonText), null) // IMPORTANT
             .setNegativeButton(getString(R.string.cancel), null)
-            .setBackground(AppCompatResources.getDrawable(requireContext(), R.color.dialog_bg))
+            .setBackground(AppCompatResources.getDrawable(requireContext(), R.drawable.shape_dialog_bg))
             .create()
 
         dialog.setCanceledOnTouchOutside(false)

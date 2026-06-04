@@ -59,7 +59,7 @@ fun AddBarrelDialogScreen(
     var expandedHeatType by remember { mutableStateOf(false) }
 
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = {}, // Ignore clicks outside the dialog
         containerColor = colorResource(R.color.dialog_bg),
         title = {
             Text(
