@@ -23,6 +23,14 @@ class AnalyticsService {
             Firebase.analytics.logEvent("qr_cloud_shared", Bundle())
         }
 
+        fun logImportQrAccountError() {
+            Firebase.analytics.logEvent("import_qr_account_error", Bundle())
+        }
+
+        fun logImportQrError() {
+            Firebase.analytics.logEvent("import_qr_error", Bundle())
+        }
+
         fun logPdfExport() {
             Firebase.analytics.logEvent("pdf_export", Bundle())
         }
@@ -33,6 +41,38 @@ class AnalyticsService {
 
         fun logImportSuccess() {
             Firebase.analytics.logEvent("data_import_success", Bundle())
+        }
+
+        fun logCameraLauncherUpdate() {
+            Firebase.analytics.logEvent("camera_launcher_update", Bundle())
+        }
+
+        fun logHistoryCameraLaucherUpdate() {
+            Firebase.analytics.logEvent("history_camera_launcher_update", Bundle())
+        }
+
+        fun logHistoryImageLauncherUpdate() {
+            Firebase.analytics.logEvent("history_image_launcher_update", Bundle())
+        }
+
+        fun logPickHistoryImageLauncherUpdate() {
+            Firebase.analytics.logEvent("pick_history_image_launcher_update", Bundle())
+        }
+
+        fun logPickBarrelImageLauncherUpdate() {
+            Firebase.analytics.logEvent("pick_barrel_image_launcher_update", Bundle())
+        }
+
+        fun logToggleHistory() {
+            Firebase.analytics.logEvent("toggle_history", Bundle())
+        }
+
+        fun logToggleStats() {
+            Firebase.analytics.logEvent("toggle_stat", Bundle())
+        }
+
+        fun logDeleteBarrel() {
+            Firebase.analytics.logEvent("delete_barrel", Bundle())
         }
 
         fun logImportError(error: String) {

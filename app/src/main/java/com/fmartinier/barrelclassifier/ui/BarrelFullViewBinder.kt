@@ -22,6 +22,7 @@ import com.fmartinier.barrelclassifier.data.dao.BarrelDao
 import com.fmartinier.barrelclassifier.data.dao.HistoryDao
 import com.fmartinier.barrelclassifier.data.model.Barrel
 import com.fmartinier.barrelclassifier.data.model.History
+import com.fmartinier.barrelclassifier.service.AnalyticsService
 import com.fmartinier.barrelclassifier.service.BarrelService
 import com.fmartinier.barrelclassifier.service.ImageService
 import com.fmartinier.barrelclassifier.service.PdfService
@@ -60,10 +61,12 @@ class BarrelFullViewBinder(
         fragmentManager = this@BarrelFullViewBinder.fragmentManager
     )
     private val statisticsDrawer = StatisticsDrawer(activity)
-    private val googleSignInClient = GoogleSignIn.getClient(activity, GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-        .requestEmail()
-        .requestScopes(Scope(DriveScopes.DRIVE_FILE))
-        .build())
+    private val googleSignInClient = GoogleSignIn.getClient(
+        activity, GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestEmail()
+            .requestScopes(Scope(DriveScopes.DRIVE_FILE))
+            .build()
+    )
     private var barrelDao = BarrelDao.getInstance(dbHelper)
     private var historyDao = HistoryDao.getInstance(dbHelper)
     private var qrCloudService: QrCloudService = QrCloudService(activity.applicationContext)
@@ -81,6 +84,7 @@ class BarrelFullViewBinder(
                         val oldImagePath = barrel.imagePath
                         barrelDao.updateImage(barrel.id, path)
                         imageService.deleteImageIfExist(oldImagePath)
+                        AnalyticsService.logCameraLauncherUpdate()
                         refresh()
                     }
                 }
@@ -94,6 +98,7 @@ class BarrelFullViewBinder(
                         val oldImagePath = history.imagePath
                         historyDao.updateImage(history.id, path)
                         imageService.deleteImageIfExist(oldImagePath)
+                        AnalyticsService.logHistoryCameraLaucherUpdate()
                         refresh()
                     }
                 }
@@ -110,6 +115,7 @@ class BarrelFullViewBinder(
                     imageService.deleteImageIfExist(oldImagePath)
                 }
             }
+            AnalyticsService.logHistoryImageLauncherUpdate()
             refresh()
         }
     private val pickBarrelImageLauncher = activity.registerForActivityResult(
@@ -124,6 +130,7 @@ class BarrelFullViewBinder(
                 imageService.deleteImageIfExist(oldImagePath)
             }
         }
+        AnalyticsService.logPickBarrelImageLauncherUpdate()
         refresh()
     }
     private val importQrLauncher = activity.registerForActivityResult(
@@ -141,16 +148,18 @@ class BarrelFullViewBinder(
                     }
                 }
             } else {
+                AnalyticsService.logImportQrAccountError()
                 Toast.makeText(
                     activity,
                     activity.getString(R.string.error_google_connexion),
                     Toast.LENGTH_SHORT
                 ).show()
             }
-        } catch (e: com.google.android.gms.common.api.ApiException) {
+        } catch (e: Exception) {
+            AnalyticsService.logImportQrError()
             Toast.makeText(
                 activity,
-                activity.getString(R.string.error_google_authent, e.statusCode.toString()),
+                activity.getString(R.string.error_google_authent, e.message),
                 Toast.LENGTH_LONG
             ).show()
         }
@@ -201,22 +210,39 @@ class BarrelFullViewBinder(
             popup.setOnMenuItemClickListener { item ->
                 when (item.itemId) {
                     R.id.action_edit_barrel -> {
-                        barrelService.openEditBarrel(barrel,
+                        barrelService.openEditBarrel(
+                            barrel,
                             this@BarrelFullViewBinder.fragmentManager
                         )
                         true
                     }
+
                     R.id.action_delete_barrel -> {
                         confirmDeleteBarrel(barrel)
                         true
                     }
+
                     R.id.barrel_take_picture -> {
                         onTakeBarrelPicture(barrel)
                         true
                     }
-                    R.id.barrel_import_image -> { onImportBarrelPicture(barrel); true }
-                    R.id.action_pdf_export -> { FileUtils.viewFile(activity, PdfService(activity).export(barrel), FileUtils.PDF_TYPE); true }
-                    R.id.action_qr_export -> { onExportQrCloud(googleSignInClient.signInIntent, barrel); true }
+
+                    R.id.barrel_import_image -> {
+                        onImportBarrelPicture(barrel); true
+                    }
+
+                    R.id.action_pdf_export -> {
+                        FileUtils.viewFile(
+                            activity,
+                            PdfService(activity).export(barrel),
+                            FileUtils.PDF_TYPE
+                        ); true
+                    }
+
+                    R.id.action_qr_export -> {
+                        onExportQrCloud(googleSignInClient.signInIntent, barrel); true
+                    }
+
                     else -> false
                 }
             }
@@ -225,7 +251,8 @@ class BarrelFullViewBinder(
 
         // Actions
         holder.btnAddHistory?.setOnClickListener {
-            barrelService.openAddHistoryDialog(barrel, null,
+            barrelService.openAddHistoryDialog(
+                barrel, null,
                 this@BarrelFullViewBinder.fragmentManager
             )
         }
@@ -243,16 +270,31 @@ class BarrelFullViewBinder(
         }
 
         holder.layoutToggleHistory?.setOnClickListener {
+            AnalyticsService.logToggleHistory()
             historyDrawer.displayAllForBarrel(holder, barrel)
-            toggleSection(holder.layoutHistory!!, holder.imgChevronHistory!!, holder.isHistoryExpanded) { holder.isHistoryExpanded = it }
+            toggleSection(
+                holder.layoutHistory!!,
+                holder.imgChevronHistory!!,
+                holder.isHistoryExpanded
+            ) { holder.isHistoryExpanded = it }
         }
         holder.layoutToggleStats?.setOnClickListener {
+            AnalyticsService.logToggleStats()
             statisticsDrawer.displayAllForBarrel(holder, barrel)
-            toggleSection(holder.layoutStats!!, holder.imgChevronStats!!, holder.isStatsExpanded) { holder.isStatsExpanded = it }
+            toggleSection(
+                holder.layoutStats!!,
+                holder.imgChevronStats!!,
+                holder.isStatsExpanded
+            ) { holder.isStatsExpanded = it }
         }
 
         if (holder.txtDescription != null && holder.txtExpandDescription != null) {
-            TextViewUtils.convertToDetailedDescription(activity, holder.txtDescription, holder.txtExpandDescription, barrel.description)
+            TextViewUtils.convertToDetailedDescription(
+                activity,
+                holder.txtDescription,
+                holder.txtExpandDescription,
+                barrel.description
+            )
         }
     }
 
@@ -265,15 +307,22 @@ class BarrelFullViewBinder(
     }
 
     private fun confirmDeleteBarrel(barrel: Barrel) {
-        MaterialAlertDialogBuilder(activity).setTitle(R.string.remove_barrel).setMessage(R.string.remove_barrel_validation)
+        MaterialAlertDialogBuilder(activity).setTitle(R.string.remove_barrel)
+            .setMessage(R.string.remove_barrel_validation)
             .setPositiveButton(R.string.remove) { _, _ ->
                 barrelService.delete(barrel)
+                AnalyticsService.logDeleteBarrel()
                 refresh()
             }
             .setNegativeButton(R.string.cancel, null).show()
     }
 
-    private fun toggleSection(view: View, chevron: ImageView, isExpanded: Boolean, updateState: (Boolean) -> Unit) {
+    private fun toggleSection(
+        view: View,
+        chevron: ImageView,
+        isExpanded: Boolean,
+        updateState: (Boolean) -> Unit
+    ) {
         if (isExpanded) collapse(view) else expand(view)
         chevron.animate().rotation(if (isExpanded) 0f else 180f).setDuration(250).start()
         updateState(!isExpanded)
@@ -344,7 +393,7 @@ class BarrelFullViewBinder(
         historyCameraLauncher.launch(imageService.takePhoto(activity, photoFile))
     }
 
-    private fun onExportQrCloud (intent: Intent, barrel: Barrel) {
+    private fun onExportQrCloud(intent: Intent, barrel: Barrel) {
         barrelForIntent = barrel
         importQrLauncher.launch(intent)
     }
