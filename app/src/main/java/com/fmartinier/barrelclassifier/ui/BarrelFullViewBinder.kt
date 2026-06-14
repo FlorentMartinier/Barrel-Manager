@@ -210,6 +210,14 @@ class BarrelFullViewBinder(
             popup.setOnMenuItemClickListener { item ->
                 when (item.itemId) {
                     R.id.action_edit_barrel -> {
+                        // Listener pour le résultat du dialog
+                        fragmentManager.setFragmentResultListener("add_barrel_result", activity) { _, bundle ->
+                            val messageId = bundle.getInt("message_id")
+                            val message = activity.getString(messageId)
+                            Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
+                            refresh()
+                        }
+                        
                         barrelService.openEditBarrel(
                             barrel,
                             this@BarrelFullViewBinder.fragmentManager

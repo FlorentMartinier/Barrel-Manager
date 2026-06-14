@@ -137,6 +137,7 @@ class AddBarrelViewModel(
 
         // Sauvegarde en base
         viewModelScope.launch {
+            var successMessage: Int? = null
             try {
                 _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
 
@@ -149,18 +150,20 @@ class AddBarrelViewModel(
                     }
                 }
 
-                val successMessage = if (isModificationMode)
+                successMessage = if (isModificationMode)
                     R.string.barrel_modified_success
                 else
                     R.string.barrel_added_success
-                onResult(AddBarrelEvent.ShowSuccess(successMessage))
 
             } catch (e: Exception) {
                 e.printStackTrace()
-                onResult(AddBarrelEvent.ShowError(R.string.barrel_save_error))
-            } finally {
                 _uiState.value = _uiState.value.copy(isLoading = false)
+                onResult(AddBarrelEvent.ShowError(R.string.barrel_save_error))
+                return@launch
             }
+
+            _uiState.value = _uiState.value.copy(isLoading = false)
+            onResult(AddBarrelEvent.ShowSuccess(successMessage))
         }
     }
 }

@@ -12,4 +12,5 @@ enum class EAlertType(val alertDescription: Int) {
     RACKING(R.string.alert_racking_description), // Soutirer
     LEES_STIRRING(R.string.alert_lees_stirring_description), // Batonner
     PUTTING_CARBOY(R.string.alert_putting_carboy_description), // Mise en Dame Jeanne
+    TURN_BARREL(R.string.alert_turn_barrel), // Retourner le fût
 }

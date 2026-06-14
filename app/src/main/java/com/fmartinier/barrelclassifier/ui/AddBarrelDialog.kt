@@ -13,8 +13,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
@@ -74,10 +76,11 @@ class AddBarrelDialog : DialogFragment() {
                         barrelId = barrelId,
                         dbHelper = db,
                         onDismiss = { dismiss() },
-                        onSuccess = {
+                        onSuccess = { messageId ->
+                            // Pass message via FragmentResult and dismiss
                             parentFragmentManager.setFragmentResult(
                                 "add_barrel_result",
-                                Bundle.EMPTY
+                                Bundle().apply { putInt("message_id", messageId) }
                             )
                             dismiss()
                         }
@@ -109,7 +112,7 @@ fun AddBarrelDialogWithViewModel(
     barrelId: Long?,
     dbHelper: DatabaseHelper,
     onDismiss: () -> Unit,
-    onSuccess: () -> Unit
+    onSuccess: (messageId: Int) -> Unit
 ) {
     val context = LocalContext.current
     val factory = AddBarrelViewModelFactory(dbHelper)
@@ -117,6 +120,8 @@ fun AddBarrelDialogWithViewModel(
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    var isWaitingForSuccess by remember { mutableStateOf(false) }
+    var successMessageId by remember { mutableStateOf<Int?>(null) }
 
     // Initialize ViewModel with barrel data if in modification mode
     LaunchedEffect(barrelId) {
@@ -136,6 +141,14 @@ fun AddBarrelDialogWithViewModel(
         }
     }
 
+    // Handle closing the dialog after loading completes
+    LaunchedEffect(uiState.isLoading, isWaitingForSuccess) {
+        if (isWaitingForSuccess && !uiState.isLoading) {
+            // Call onSuccess with the message, which will dismiss and show the snackbar
+            successMessageId?.let { onSuccess(it) }
+            isWaitingForSuccess = false
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         AddBarrelDialogScreen(
@@ -158,10 +171,9 @@ fun AddBarrelDialogWithViewModel(
                             }
                         }
                         is AddBarrelEvent.ShowSuccess -> {
-                            scope.launch {
-                                snackbarHostState.showSnackbar(context.getString(event.messageId))
-                                onSuccess()
-                            }
+                            // Store the message ID and mark that we're waiting
+                            successMessageId = event.messageId
+                            isWaitingForSuccess = true
                         }
                         is AddBarrelEvent.Dismiss -> {
                             onDismiss()

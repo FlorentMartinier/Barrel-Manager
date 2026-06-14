@@ -3,14 +3,17 @@ package com.fmartinier.barrelclassifier.ui.compose
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -409,14 +412,28 @@ fun AddBarrelDialogScreen(
                     contentColor = colorResource(id = R.color.accent_whisky)
                 )
             ) {
-                Text(
-                    if (uiState.isLoading)
-                        stringResource(R.string.saving)
-                    else
+                if (uiState.isLoading) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp,
+                            color = colorResource(id = R.color.accent_whisky)
+                        )
+                        Text(
+                            stringResource(R.string.saving),
+                            modifier = Modifier.padding(start = 8.dp)
+                        )
+                    }
+                } else {
+                    Text(
                         stringResource(
                             if (uiState.barrelId != null) R.string.modify else R.string.add
                         )
-                )
+                    )
+                }
             }
         },
         dismissButton = {
