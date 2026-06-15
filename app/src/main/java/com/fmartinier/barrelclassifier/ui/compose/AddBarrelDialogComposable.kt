@@ -3,25 +3,20 @@ package com.fmartinier.barrelclassifier.ui.compose
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -29,7 +24,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
@@ -55,7 +49,6 @@ fun AddBarrelDialogScreen(
     brandList: List<String> = emptyList(),
     woodTypeList: List<String> = emptyList(),
     heatingTypeList: List<String> = emptyList(),
-    snackbarHostState: SnackbarHostState
 ) {
     var expandedBrand by remember { mutableStateOf(false) }
     var expandedWoodType by remember { mutableStateOf(false) }
@@ -394,14 +387,6 @@ fun AddBarrelDialogScreen(
                         }
                     }
                 }
-
-                // Snackbar inside the dialog window so it appears above dialog content
-                SnackbarHost(
-                    hostState = snackbarHostState,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 8.dp)
-                )
             }
         },
         confirmButton = {
@@ -412,28 +397,14 @@ fun AddBarrelDialogScreen(
                     contentColor = colorResource(id = R.color.accent_whisky)
                 )
             ) {
-                if (uiState.isLoading) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(16.dp),
-                            strokeWidth = 2.dp,
-                            color = colorResource(id = R.color.accent_whisky)
-                        )
-                        Text(
-                            stringResource(R.string.saving),
-                            modifier = Modifier.padding(start = 8.dp)
-                        )
-                    }
-                } else {
-                    Text(
+                Text(
+                    if (uiState.isLoading)
+                        stringResource(R.string.saving)
+                    else
                         stringResource(
                             if (uiState.barrelId != null) R.string.modify else R.string.add
                         )
-                    )
-                }
+                )
             }
         },
         dismissButton = {

@@ -5,18 +5,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
@@ -76,11 +73,10 @@ class AddBarrelDialog : DialogFragment() {
                         barrelId = barrelId,
                         dbHelper = db,
                         onDismiss = { dismiss() },
-                        onSuccess = { messageId ->
-                            // Pass message via FragmentResult and dismiss
+                        onSuccess = {
                             parentFragmentManager.setFragmentResult(
                                 "add_barrel_result",
-                                Bundle().apply { putInt("message_id", messageId) }
+                                Bundle.EMPTY
                             )
                             dismiss()
                         }
@@ -112,16 +108,13 @@ fun AddBarrelDialogWithViewModel(
     barrelId: Long?,
     dbHelper: DatabaseHelper,
     onDismiss: () -> Unit,
-    onSuccess: (messageId: Int) -> Unit
+    onSuccess: () -> Unit
 ) {
     val context = LocalContext.current
     val factory = AddBarrelViewModelFactory(dbHelper)
     val viewModel: AddBarrelViewModel = viewModel(factory = factory)
     val uiState by viewModel.uiState.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    var isWaitingForSuccess by remember { mutableStateOf(false) }
-    var successMessageId by remember { mutableStateOf<Int?>(null) }
 
     // Initialize ViewModel with barrel data if in modification mode
     LaunchedEffect(barrelId) {
@@ -141,14 +134,6 @@ fun AddBarrelDialogWithViewModel(
         }
     }
 
-    // Handle closing the dialog after loading completes
-    LaunchedEffect(uiState.isLoading, isWaitingForSuccess) {
-        if (isWaitingForSuccess && !uiState.isLoading) {
-            // Call onSuccess with the message, which will dismiss and show the snackbar
-            successMessageId?.let { onSuccess(it) }
-            isWaitingForSuccess = false
-        }
-    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         AddBarrelDialogScreen(
@@ -167,13 +152,14 @@ fun AddBarrelDialogWithViewModel(
                     when (event) {
                         is AddBarrelEvent.ShowError -> {
                             scope.launch {
-                                snackbarHostState.showSnackbar(context.getString(event.messageId))
+                                Toast.makeText(context, context.getString(event.messageId), Toast.LENGTH_SHORT).show()
                             }
                         }
                         is AddBarrelEvent.ShowSuccess -> {
-                            // Store the message ID and mark that we're waiting
-                            successMessageId = event.messageId
-                            isWaitingForSuccess = true
+                            scope.launch {
+                                Toast.makeText(context, context.getString(event.messageId), Toast.LENGTH_SHORT).show()
+                                onSuccess()
+                            }
                         }
                         is AddBarrelEvent.Dismiss -> {
                             onDismiss()
@@ -185,7 +171,6 @@ fun AddBarrelDialogWithViewModel(
             brandList = listOf("Allary", "Navarre", "Seguin Moreau", "Taransaud", "Radoux", "Damy"),
             woodTypeList = stringArrayResource(id = R.array.wood_types_array).toList(),
             heatingTypeList = stringArrayResource(id = R.array.heating_types_array).toList(),
-            snackbarHostState = snackbarHostState
         )
     }
 }

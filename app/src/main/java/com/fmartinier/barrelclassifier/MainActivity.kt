@@ -12,7 +12,6 @@ import android.view.animation.AnimationUtils
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.RelativeLayout
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -91,10 +90,7 @@ class MainActivity : AppCompatActivity() {
         supportFragmentManager.setFragmentResultListener(
             "add_barrel_result",
             this
-        ) { _, bundle ->
-            val messageId = bundle.getInt("message_id")
-            val message = getString(messageId)
-            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+        ) { _, _ ->
             loadBarrels()
         }
 
