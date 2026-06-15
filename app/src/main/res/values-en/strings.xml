@@ -169,6 +169,7 @@
         <item>Chestnut</item>
         <item>Cherry Wood</item>
         <item>Mulberry</item>
+        <item>Hybrid (wood/stainless steel)</item>
     </string-array>
     <string-array name="heating_types_array">
         <item>Light Toast</item>

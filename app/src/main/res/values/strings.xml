@@ -169,6 +169,7 @@
         <item>Châtaignier</item>
         <item>Cerisier</item>
         <item>Mûrier</item>
+        <item>Hybride (bois/inox)</item>
     </string-array>
     <string-array name="heating_types_array">
         <item>Légère</item>
