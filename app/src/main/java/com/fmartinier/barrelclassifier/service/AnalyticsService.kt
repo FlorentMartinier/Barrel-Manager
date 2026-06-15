@@ -75,6 +75,14 @@ class AnalyticsService {
             Firebase.analytics.logEvent("delete_barrel", Bundle())
         }
 
+        fun logOpenDialogAddBarrel() {
+            Firebase.analytics.logEvent("open_dialog_add_barrel", Bundle())
+        }
+
+        fun logOpenDialogAddHystory() {
+            Firebase.analytics.logEvent("open_dialog_add_hystory", Bundle())
+        }
+
         fun logImportError(error: String) {
             val parameters = Bundle().apply {
                 this.putString("error", error)

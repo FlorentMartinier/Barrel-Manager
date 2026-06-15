@@ -31,6 +31,7 @@ class BarrelService(val context: Context, dbHelper: DatabaseHelper) {
     }
 
     fun openAddHistoryDialog(barrel: Barrel, historyId: Long? = null, manager: FragmentManager) {
+        AnalyticsService.logOpenDialogAddHystory()
         AddHistoryDialog.newInstance(barrel, historyId)
             .show(manager, AddHistoryDialog.TAG)
     }

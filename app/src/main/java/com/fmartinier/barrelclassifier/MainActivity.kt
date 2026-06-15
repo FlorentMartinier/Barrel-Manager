@@ -25,6 +25,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.fmartinier.barrelclassifier.data.DatabaseHelper
 import com.fmartinier.barrelclassifier.data.dao.BarrelDao
 import com.fmartinier.barrelclassifier.data.dao.HistoryDao
+import com.fmartinier.barrelclassifier.service.AnalyticsService
 import com.fmartinier.barrelclassifier.service.ImportExportService
 import com.fmartinier.barrelclassifier.service.NotificationService
 import com.fmartinier.barrelclassifier.service.QrCloudService
@@ -225,6 +226,7 @@ class MainActivity : AppCompatActivity() {
      * Ouvre le dialog d'ajout de fût
      */
     private fun openAddBarrelDialog() {
+        AnalyticsService.logOpenDialogAddBarrel()
         AddBarrelDialog
             .newInstance()
             .show(supportFragmentManager, AddBarrelDialog.TAG)
