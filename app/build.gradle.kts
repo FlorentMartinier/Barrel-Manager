@@ -12,9 +12,9 @@ android {
     defaultConfig {
         applicationId = "com.fmartinier.barrelclassifier"
         minSdk = 24
-        targetSdk = 35
-        versionCode = 37
-        versionName = "3.0.4"
+        targetSdk = 36
+        versionCode = 38
+        versionName = "3.0.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
